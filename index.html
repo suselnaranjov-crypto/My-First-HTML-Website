@@ -4,60 +4,113 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Susel Naranjo | The Creative Multiclass</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <header>
-        <h1>Susel Naranjo: The Creative Multiclass</h1>
-        <p>Architectural thinker, digital creator, and collector of creative side quests.</p>
+<body class="desktop-page">
+  <main class="desktop">
 
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="classified.html">Classified File</a>
-        </nav>
-    </header>
+    <div class="desktop-icons">
 
-    <main>
-        <section>
+      <div class="desktop-app">
+        <input class="window-toggle" type="checkbox" id="about-open">
+        <label class="desktop-icon" for="about-open">
+          <span class="desktop-icon-image">📄</span>
+          <span>About</span>
+        </label>
+
+        <section class="desktop-window">
+          <div class="window-titlebar">
+            <span>About - Susel Naranjo</span>
+            <label class="window-close" for="about-open">×</label>
+          </div>
+          <div class="window-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; View&nbsp;&nbsp; Help</div>
+          <div class="window-content">
+            <h1 id="site-title">Susel Naranjo</h1>
+            <p class="window-subtitle">The Creative Multiclass</p>
             <h2>Origin Story</h2>
             <p>
-                Susel began by learning to see the world through an architectural lens:
-                noticing how spaces work, how people move through them, and how small
-                details can change an experience. That curiosity eventually expanded
-                into digital design, photography, and other creative projects.
+              Susel began by learning to see the world through an architectural lens:
+              noticing how spaces work, how people move through them, and how small
+              details can change an experience. That curiosity eventually expanded
+              into digital design, photography, and other creative projects.
             </p>
+          </div>
+          <div class="window-status">About.txt</div>
         </section>
+      </div>
 
-        <section>
+      <div class="desktop-app">
+        <input class="window-toggle" type="checkbox" id="skills-open">
+        <label class="desktop-icon" for="skills-open">
+          <span class="desktop-icon-image">📁</span>
+          <span>Skills</span>
+        </label>
+
+        <section class="desktop-window">
+          <div class="window-titlebar">
+            <span>Skills and Abilities</span>
+            <label class="window-close" for="skills-open">×</label>
+          </div>
+          <div class="window-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; View&nbsp;&nbsp; Help</div>
+          <div class="window-content">
             <h2>Skills and Abilities</h2>
-            <div>
-                <ul>
-                    <li>Turning complex ideas into clear visual experiences</li>
-                    <li>Designing spaces, interfaces, and digital projects</li>
-                    <li>Communicating in English and Spanish</li>
-                </ul>
-            </div>
+            <ul>
+              <li>Turning complex ideas into clear visual experiences</li>
+              <li>Designing spaces, interfaces, and digital projects</li>
+              <li>Communicating in English and Spanish</li>
+            </ul>
+          </div>
+          <div class="window-status">3 items</div>
         </section>
+      </div>
 
-        <section>
-            <h2>Field Notes</h2>
+      <div class="desktop-app">
+        <input class="window-toggle" type="checkbox" id="field-notes-open">
+        <label class="desktop-icon" for="field-notes-open">
+          <span class="desktop-icon-image">🖼️</span>
+          <span>Field Notes</span>
+        </label>
+
+        <section class="desktop-window">
+          <div class="window-titlebar">
+            <span>Field Notes</span>
+            <label class="window-close" for="field-notes-open">×</label>
+          </div>
+          <div class="window-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; View&nbsp;&nbsp; Help</div>
+          <div class="window-content">
             <p>
-                When not working on a design, Susel may be playing volleyball,
-                exploring a new idea, or starting another creative side quest.
+              When not working on a design, Susel may be playing volleyball,
+              exploring a new idea, or starting another creative side quest.
             </p>
-
-            <img src="images/IMG_2099.png"
-                 alt="Portrait of Susel Naranjo at MDM."
-                 width="400">
-
+            <img
+              src="images/IMG_2099.png"
+              alt="Portrait of Susel Naranjo at MDM."
+              width="400"
+            >
             <p>
-                My current favourite painting for Q4 is Salvador Dalí’s
-                <a href="https://www.moma.org/collection/works/79018">The Persistence of Memory</a>.
+              My current favourite painting for Q4 is Salvador Dalí’s
+              <a href="https://www.moma.org/collection/works/79018">
+                The Persistence of Memory
+              </a>.
             </p>
+          </div>
+          <div class="window-status">Field notes and image</div>
         </section>
-    </main>
+      </div>
 
-    <footer>
-        <p>End of homepage. More classified information awaits.</p>
-    </footer>
+      <a class="desktop-icon" href="loading.html">
+        <span class="desktop-icon-image classified-rabbit">🐇</span>
+        <span>Classified File</span>
+      </a>
+
+    </div>
+
+    <div class="taskbar">
+      <button class="start-button" type="button">▦ Start</button>
+      <span class="taskbar-label">Susel's Desktop</span>
+      <span class="taskbar-clock">Windows 95&nbsp;&nbsp; 3:00 PM</span>
+    </div>
+
+  </main>
 </body>
 </html>
