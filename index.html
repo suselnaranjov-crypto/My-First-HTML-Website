@@ -5,11 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Susel Naranjo | The Creative Multiclass</title>
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body class="desktop-page">
   <main class="desktop">
+    <button id="theme-toggle" type="button">Toggle light / dark mode</button>
 
     <div class="desktop-icons">
+
+      <div class="desktop-app">
+        <input class="window-toggle" type="checkbox" id="welcome-open">
+
+        <label class="desktop-icon" for="welcome-open">
+          <span class="desktop-icon-image">👋</span>
+          <span>Welcome</span>
+        </label>
+
+        <section class="desktop-window">
+          <div class="window-titlebar">
+            <span>Welcome - Visitor Login</span>
+            <label class="window-close" for="welcome-open">×</label>
+          </div>
+
+          <div class="window-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; Help</div>
+
+          <div class="window-content">
+            <h1>Hello, visitor!</h1>
+
+            <form id="greeting-form" novalidate>
+              <label for="visitor-name">Enter your name:</label>
+              <input id="visitor-name" type="text" maxlength="50">
+              <button type="submit">Say hello</button>
+            </form>
+
+            <p id="greeting" aria-live="polite">
+              Your personalized greeting will appear here.
+            </p>
+          </div>
+
+          <div class="window-status">Welcome to Susel's desktop.</div>
+        </section>
+      </div>
+
+      <div class="desktop-app">
+        <input class="window-toggle" type="checkbox" id="facts-open">
+
+        <label class="desktop-icon" for="facts-open">
+          <span class="desktop-icon-image">🎲</span>
+          <span>Random Facts</span>
+        </label>
+
+        <section class="desktop-window">
+          <div class="window-titlebar">
+            <span>Random Facts - Susel Naranjo</span>
+            <label class="window-close" for="facts-open">×</label>
+          </div>
+
+          <div class="window-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; Help</div>
+
+          <div class="window-content">
+            <h1>Susel Facts.txt</h1>
+            <p id="fact">Click the button to discover a fact about me.</p>
+            <button id="fact-btn" type="button">Show a random fact</button>
+          </div>
+
+          <div class="window-status">Five facts. One random discovery.</div>
+        </section>
+      </div>
 
       <div class="desktop-app">
         <input class="window-toggle" type="checkbox" id="about-open">

@@ -567,3 +567,114 @@ body.loading-page {
   );
   box-shadow: 0 0 8px rgba(57, 255, 99, 0.45);
 }
+
+/* Theme button */
+#theme-toggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+  padding: 8px 12px;
+  border: 2px outset #ffffff;
+  background-color: #c0c0c0;
+  color: #000000;
+  font-family: Tahoma, Arial, sans-serif;
+  cursor: pointer;
+}
+
+#theme-toggle:active {
+  border-style: inset;
+}
+
+/* Dark theme */
+body.dark .desktop {
+  background-color: #102b2b;
+}
+
+body.dark .desktop-window {
+  background-color: #333333;
+  color: #ffffff;
+  box-shadow: 5px 5px 0 #061616;
+}
+
+body.dark .window-titlebar {
+  background-color: #15154d;
+}
+
+body.dark .window-content {
+  background-color: #202020;
+  color: #eeeeee;
+}
+
+body.dark .window-content h1 {
+  color: #70dddd;
+}
+
+body.dark .window-content h2 {
+  color: #b0b0ff;
+}
+
+body.dark .window-subtitle {
+  color: #cccccc;
+}
+
+body.dark .window-content a {
+  color: #91caff;
+}
+
+body.dark .window-menu,
+body.dark .window-status,
+body.dark .window-close,
+body.dark .taskbar,
+body.dark .start-button,
+body.dark .taskbar-label,
+body.dark .taskbar-clock,
+body.dark #theme-toggle {
+  background-color: #383838;
+  color: #ffffff;
+}
+
+/* Interactive window controls */
+.window-content button {
+  padding: 7px 12px;
+  border: 2px outset #ffffff;
+  border-radius: 0;
+  background: #c0c0c0;
+  color: #000000;
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.window-content button:active {
+  border-style: inset;
+}
+
+#greeting-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+#visitor-name {
+  width: 180px;
+  max-width: 100%;
+  padding: 7px;
+  border: 2px inset #c0c0c0;
+  border-radius: 0;
+  background: #ffffff;
+  color: #000000;
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 14px;
+}
+
+body.dark .window-content button {
+  background: #383838;
+  color: #ffffff;
+}
+
+body.dark #visitor-name {
+  background: #202020;
+  color: #ffffff;
+}
