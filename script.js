@@ -44,3 +44,126 @@ greetingForm.addEventListener("submit", function (event) {
       "Hello, " + visitorName + "! Welcome to Susel's desktop.";
   }
 });
+
+const asteroidToggle = document.querySelector("#asteroid-open");
+const asteroidWindow = document.querySelector("#asteroid-window");
+const asteroidBar = asteroidWindow.querySelector(".window-titlebar");
+
+asteroidWindow.querySelector(".window-close").addEventListener("click", () => {
+  asteroidToggle.checked = false;
+  asteroidToggle.focus();
+});
+
+const desktopArea = document.querySelector(".desktop");
+
+if (desktopArea) {
+  function bringToFront(panel) {
+    if (!panel) return;
+    desktopArea.querySelector(".is-front")?.classList.remove("is-front");
+    panel.classList.add("is-front");
+  }
+
+  function makeDraggable(handle, item) {
+    let drag = null;
+    let suppressClick = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    handle.addEventListener("dragstart", (event) => event.preventDefault());
+
+    handle.addEventListener("pointerdown", (event) => {
+      suppressClick = false;
+      if (event.button !== 0 || event.target.closest(".window-close")) return;
+
+      drag = {
+        id: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+        offsetX,
+        offsetY,
+        bounds: item.getBoundingClientRect(),
+        handleHeight: handle.offsetHeight,
+        moved: false
+      };
+    });
+
+    window.addEventListener("pointermove", (event) => {
+      if (drag?.id !== event.pointerId) return;
+
+      const dx = event.clientX - drag.x;
+      const dy = event.clientY - drag.y;
+
+      // Leave small movements alone so an ordinary click still opens the app.
+      if (!drag.moved && Math.hypot(dx, dy) < 6) return;
+      if (!drag.moved) {
+        drag.moved = true;
+        suppressClick = true;
+        handle.setPointerCapture(event.pointerId);
+      }
+
+      const area = desktopArea.getBoundingClientRect();
+      const bottom = Math.min(area.bottom, window.innerHeight - 48);
+      const minX = area.left - drag.bounds.left;
+      const maxX = Math.max(minX, area.right - drag.bounds.right);
+      const minY = Math.max(0, area.top) - drag.bounds.top;
+      const maxY = Math.max(minY, bottom - drag.bounds.top - drag.handleHeight);
+
+      offsetX = drag.offsetX + Math.max(minX, Math.min(dx, maxX));
+      offsetY = drag.offsetY + Math.max(minY, Math.min(dy, maxY));
+      item.style.translate = offsetX + "px " + offsetY + "px";
+    });
+
+    function finishDrag(event) {
+      if (drag?.id === event.pointerId) drag = null;
+    }
+
+    window.addEventListener("pointerup", finishDrag);
+    window.addEventListener("pointercancel", finishDrag);
+
+    handle.addEventListener("click", (event) => {
+      if (!suppressClick || event.detail === 0) return;
+      suppressClick = false;
+      event.preventDefault();
+      event.stopPropagation();
+    }, true);
+  }
+
+  desktopArea.querySelectorAll(".desktop-window").forEach((panel) => {
+    panel.addEventListener("pointerdown", () => bringToFront(panel));
+    makeDraggable(panel.querySelector(".window-titlebar"), panel);
+  });
+
+  desktopArea.querySelectorAll(".window-toggle").forEach((toggle) => {
+    toggle.addEventListener("change", () => {
+      if (toggle.checked) {
+        bringToFront(toggle.parentElement.querySelector(".desktop-window"));
+      }
+    });
+  });
+
+  desktopArea.querySelectorAll(".desktop-icon").forEach((icon) => {
+    makeDraggable(icon, icon);
+  });
+}
+
+const desktopClock = document.querySelector("#desktop-clock");
+
+if (desktopClock) {
+  const clockFormat = new Intl.DateTimeFormat("en-CA", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true
+  });
+
+  function updateDesktopClock() {
+    const now = new Date();
+    desktopClock.dateTime = now.toISOString();
+    desktopClock.textContent = clockFormat.format(now);
+  }
+
+  updateDesktopClock();
+  setInterval(updateDesktopClock, 1000);
+}

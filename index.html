@@ -160,6 +160,36 @@
         </section>
       </div>
 
+      <div class="desktop-app">
+        <input class="window-toggle" type="checkbox" id="asteroid-open"
+              aria-controls="asteroid-window">
+
+        <label class="desktop-icon" for="asteroid-open">
+          <svg class="desktop-icon-image" width="36" height="36" viewBox="0 0 36 36"
+              aria-hidden="true" focusable="false">
+            <rect x="1" y="1" width="34" height="34" fill="#090e23"
+                  stroke="#d2d2d2" stroke-width="2"/>
+            <path d="M9 28 16 13 23 28 16 24Z"
+                  fill="#143f58" stroke="#9efaf1" stroke-width="2"/>
+            <path d="M24 7 28 6 31 10 29 14 24 13 22 10Z"
+                  fill="none" stroke="#f7a478" stroke-width="1.5"/>
+            <path d="M16 28v3" stroke="#f7a478" stroke-width="2"/>
+            <path d="M8 8h2m19 14h2" stroke="#8eb4ec"/>
+          </svg>
+          <span>Asteroid Patrol</span>
+        </label>
+
+        <section class="desktop-window" id="asteroid-window"
+                aria-labelledby="asteroid-title">
+          <div class="window-titlebar">
+            <span id="asteroid-title">Asteroid Patrol</span>
+            <button class="window-close" type="button" aria-label="Close Asteroid Patrol">×</button>
+          </div>
+
+          <iframe src="asteroid-patrol.html" title="Asteroid Patrol game"></iframe>
+        </section>
+      </div>
+
       <a class="desktop-icon" href="loading.html">
         <span class="desktop-icon-image classified-rabbit">🐇</span>
         <span>Classified File</span>
@@ -167,10 +197,20 @@
 
     </div>
 
+    <aside class="desktop-note" aria-labelledby="desktop-note-title">
+      <h2 id="desktop-note-title">A note for Cody</h2>
+      <p>I took your suggestion and made the windows movable! Here’s what to try:</p>
+      <ul>
+        <li>Open Random Facts and drag it by its blue title bar.</li>
+        <li>Drag a desktop icon to move it. Click it to open the app.</li>
+        <li>Open Asteroid Patrol from the middle of the desktop. Use ← and → to move and Space to shoot. Watch the score and shields update.</li>
+      </ul>
+    </aside>
+
     <div class="taskbar">
       <button class="start-button" type="button">▦ Start</button>
       <span class="taskbar-label">Susel's Desktop</span>
-      <span class="taskbar-clock">Windows 95&nbsp;&nbsp; 3:00 PM</span>
+      <time class="taskbar-clock" id="desktop-clock"></time>
     </div>
 
   </main>

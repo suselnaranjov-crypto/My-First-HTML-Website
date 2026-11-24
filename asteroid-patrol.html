@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asteroid Patrol</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px; background: #087b7a; color: #17191c; font: 15px Tahoma, sans-serif; }
+  main { max-width: 650px; margin: 3vh auto; background: #c0c0c0; border: 3px outset #ddd; padding: 4px; box-shadow: 7px 8px #004f50; }
+  h1 { margin: 0; padding: 8px; background: #080b72; color: white; font-size: 17px; }
+  .content { padding: 9px; }
+  .hud, .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .hud { justify-content: space-between; font: bold 14px monospace; padding: 8px 0; }
+  canvas { display: block; width: 100%; height: auto; border: 3px inset #ddd; background: #070c20; }
+  button { font: inherit; color: inherit; background: #c0c0c0; border: 2px outset #eee; padding: 7px 12px; cursor: pointer; }
+  button:active { border-style: inset; }
+  button:focus-visible, a:focus-visible { outline: 2px solid #080b72; outline-offset: 2px; }
+  .controls { margin-top: 9px; }
+  .controls button { touch-action: none; }
+  p { margin: 9px 0; line-height: 1.45; }
+  a { color: #080b72; }
+  body {
+  padding: 0;
+  background: #c0c0c0;
+}
+
+main {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+main > h1 {
+  display: none;
+}
+
+canvas {
+  width: min(100%, max(120px, calc((100vh - 145px) * 1.5)));
+  margin-inline: auto;
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>Asteroid Patrol</h1>
+  <div class="content">
+    <div class="hud">
+      <span>SCORE <output id="score">0000</output></span>
+      <span>SHIELDS <output id="shields">3</output></span>
+      <span>WAVE <output id="wave">1</output></span>
+    </div>
+    <canvas id="field" width="600" height="400" aria-label="Asteroid Patrol playfield"></canvas>
+    <div class="controls">
+      <button id="start">Start game</button>
+      <button id="pause" disabled>Pause</button>
+      <button type="button" data-action="left" aria-label="Move left">←</button>
+      <button type="button" data-action="right" aria-label="Move right">→</button>
+      <button type="button" data-action="fire">Fire</button>
+    </div>
+    <p id="status" role="status">Ready for launch.</p>
+    <p>Use ← and → to move, Space to fire, and Esc to pause. Hold a button to play on touchscreens. Any asteroid that hits you or gets through costs a shield.</p>
+  </div>
+</main>
+<script>
+  const canvas = document.querySelector("#field");
+  const ctx = canvas.getContext("2d");
+  const {width, height} = canvas;
+  const shipY = height - 36;
+  const start = document.querySelector("#start");
+  const pause = document.querySelector("#pause");
+  const status = document.querySelector("#status");
+  const score = document.querySelector("#score");
+  const shields = document.querySelector("#shields");
+  const wave = document.querySelector("#wave");
+  const keys = new Set();
+  const pointers = new Map();
+  const controls = new Map([
+    ["ArrowLeft", "left"], ["ArrowRight", "right"], ["Space", "fire"]
+  ]);
+  const palette = ["#f7a478", "#b4acff", "#ffd476"];
+  const stars = Array.from({length: 85}, (_, i) => ({
+    x: (i * 139 + i * i * 3) % width,
+    y: (i * 83 + i * i * 7) % height,
+    size: i % 5 === 0 ? 2 : 1
+  }));
+  let game;
+  let lastTime = 0;
+
+  function reset(mode) {
+    game = {
+      mode, x: width / 2, score: 0, shields: 3, wave: 1,
+      spawn: .45, cooldown: 0, elapsed: 0, rocks: [], shots: [], sparks: []
+    };
+    keys.clear();
+    pointers.clear();
+    updateHud();
+    updateControls();
+  }
+
+  function updateHud() {
+    score.textContent = String(game.score).padStart(4, "0");
+    shields.textContent = game.shields;
+    wave.textContent = game.wave;
+  }
+
+  function updateControls() {
+    start.textContent = game.mode === "ready" ? "Start game" : "Restart";
+    pause.disabled = game.mode === "ready" || game.mode === "over";
+    pause.textContent = game.mode === "paused" ? "Resume" : "Pause";
+  }
+
+  function setPaused(paused) {
+    game.mode = paused ? "paused" : "playing";
+    keys.clear();
+    pointers.clear();
+    status.textContent = paused ? "Patrol paused." : "Patrol resumed.";
+    updateControls();
+  }
+
+  function active(action) {
+    return keys.has(action) || [...pointers.values()].includes(action);
+  }
+
+  function spawnRock() {
+    const radius = 14 + Math.random() * 14;
+    game.rocks.push({
+      x: radius + Math.random() * (width - radius * 2), y: -radius,
+      radius, speed: 75 + Math.random() * 60 + game.wave * 14,
+      angle: Math.random() * Math.PI, spin: Math.random() * 2 - 1,
+      color: palette[Math.floor(Math.random() * palette.length)],
+      edges: Array.from({length: 9}, () => .75 + Math.random() * .25)
+    });
+  }
+
+  function burst(rock) {
+    for (let i = 0; i < 10; i++) {
+      const angle = i * Math.PI / 5;
+      game.sparks.push({
+        x: rock.x, y: rock.y, dx: Math.cos(angle) * 115,
+        dy: Math.sin(angle) * 115, color: rock.color, life: .32
+      });
+    }
+  }
+
+  function overlaps(x, y, rock, padding) {
+    return Math.hypot(x - rock.x, y - rock.y) < rock.radius * .9 + padding;
+  }
+
+  function update(dt) {
+    game.elapsed += dt;
+    const nextWave = 1 + Math.floor(game.elapsed / 15);
+    if (nextWave !== game.wave) {
+      game.wave = nextWave;
+      status.textContent = "Wave " + nextWave + ". Asteroids are speeding up.";
+      updateHud();
+    }
+    const direction = Number(active("right")) - Number(active("left"));
+    game.x = Math.max(20, Math.min(width - 20, game.x + direction * 330 * dt));
+    game.cooldown -= dt;
+    if (active("fire") && game.cooldown <= 0) {
+      game.shots.push({x: game.x, y: shipY - 16});
+      game.cooldown = .18;
+    }
+    game.spawn -= dt;
+    if (game.spawn <= 0) {
+      spawnRock();
+      game.spawn = Math.max(.35, 1 - game.wave * .08) + Math.random() * .2;
+    }
+    for (const shot of game.shots) shot.y -= 475 * dt;
+    for (const rock of game.rocks) {
+      rock.y += rock.speed * dt;
+      rock.angle += rock.spin * dt;
+      const shot = game.shots.find(item => !item.used && overlaps(item.x, item.y, rock, 3));
+      if (shot) {
+        shot.used = true;
+        rock.used = true;
+        game.score += 100;
+        burst(rock);
+        updateHud();
+      } else if (rock.y - rock.radius > height || overlaps(game.x, shipY, rock, 10)) {
+        rock.used = true;
+        burst(rock);
+        game.shields--;
+        updateHud();
+        if (game.shields === 0) {
+          game.mode = "over";
+          status.textContent = "Game over. Final score " + game.score + ".";
+          updateControls();
+          break;
+        }
+        status.textContent = "Shield lost. " + game.shields + " remaining.";
+      }
+    }
+    game.rocks = game.rocks.filter(rock => !rock.used);
+    game.shots = game.shots.filter(shot => !shot.used && shot.y > -12);
+    for (const spark of game.sparks) {
+      spark.x += spark.dx * dt;
+      spark.y += spark.dy * dt;
+      spark.life -= dt;
+    }
+    game.sparks = game.sparks.filter(spark => spark.life > 0);
+  }
+
+  function draw() {
+    ctx.fillStyle = "#070c20";
+    ctx.fillRect(0, 0, width, height);
+    for (const star of stars) {
+      ctx.fillStyle = star.size === 2 ? "#8eb4ec" : "#426183";
+      ctx.fillRect(star.x, (star.y + game.elapsed * star.size * 7) % height, star.size, star.size);
+    }
+    ctx.strokeStyle = "#244267";
+    ctx.beginPath();
+    ctx.moveTo(0, height - 12);
+    ctx.lineTo(width, height - 12);
+    ctx.stroke();
+
+    for (const rock of game.rocks) {
+      ctx.beginPath();
+      rock.edges.forEach((edge, index) => {
+        const angle = rock.angle + index * Math.PI * 2 / rock.edges.length;
+        const x = rock.x + Math.cos(angle) * edge * rock.radius;
+        const y = rock.y + Math.sin(angle) * edge * rock.radius;
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = "#222846";
+      ctx.fill();
+      ctx.strokeStyle = rock.color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    ctx.fillStyle = "#9efaf1";
+    for (const shot of game.shots) ctx.fillRect(shot.x - 2, shot.y - 8, 4, 10);
+    for (const spark of game.sparks) {
+      ctx.fillStyle = spark.color;
+      ctx.fillRect(spark.x, spark.y, 3, 3);
+    }
+    ctx.beginPath();
+    ctx.moveTo(game.x, shipY - 17);
+    ctx.lineTo(game.x + 17, shipY + 11);
+    ctx.lineTo(game.x, shipY + 5);
+    ctx.lineTo(game.x - 17, shipY + 11);
+    ctx.closePath();
+    ctx.fillStyle = "#143f58";
+    ctx.fill();
+    ctx.strokeStyle = "#9efaf1";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    if (game.mode !== "playing") {
+      const messages = {
+        ready: ["ASTEROID PATROL", "Defend the station"],
+        paused: ["PAUSED", "Press Esc to resume"],
+        over: ["GAME OVER", "Final score  " + game.score]
+      };
+      const [title, subtitle] = messages[game.mode];
+      ctx.fillStyle = "#070c20dd";
+      ctx.fillRect(40, 137, width - 80, 113);
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#9efaf1";
+      ctx.font = "bold 34px monospace";
+      ctx.fillText(title, width / 2, 186);
+      ctx.fillStyle = "#f7a478";
+      ctx.font = "18px monospace";
+      ctx.fillText(subtitle, width / 2, 218);
+    }
+  }
+
+  start.addEventListener("click", () => {
+    reset("playing");
+    status.textContent = "Patrol started. Wave 1.";
+  });
+  pause.addEventListener("click", () => setPaused(game.mode === "playing"));
+
+  window.addEventListener("keydown", event => {
+    if (event.code === "Escape" && !pause.disabled && !event.repeat) {
+      setPaused(game.mode === "playing");
+      return;
+    }
+    const action = controls.get(event.code);
+    if (!action || game.mode !== "playing") return;
+    event.preventDefault();
+    keys.add(action);
+  });
+  window.addEventListener("keyup", event => keys.delete(controls.get(event.code)));
+  window.addEventListener("blur", () => {
+    if (game.mode === "playing") setPaused(true);
+  });
+
+  document.querySelectorAll("[data-action]").forEach(button => {
+    button.addEventListener("pointerdown", event => {
+      if (event.button !== 0 || game.mode !== "playing") return;
+      button.setPointerCapture(event.pointerId);
+      pointers.set(event.pointerId, button.dataset.action);
+    });
+    for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
+      button.addEventListener(type, event => pointers.delete(event.pointerId));
+    }
+    button.addEventListener("click", event => {
+      if (event.detail !== 0 || game.mode !== "playing") return;
+      if (button.dataset.action === "fire") game.shots.push({x: game.x, y: shipY - 16});
+      else game.x = Math.max(20, Math.min(width - 20, game.x + (button.dataset.action === "left" ? -24 : 24)));
+    });
+  });
+
+  function frame(time) {
+    const dt = Math.min((time - lastTime) / 1000, .032);
+    lastTime = time;
+    if (game.mode === "playing") update(dt);
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  reset("ready");
+  requestAnimationFrame(frame);
+</script>
+</body>
+</html>
